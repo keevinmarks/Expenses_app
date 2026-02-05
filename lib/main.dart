@@ -2,8 +2,10 @@ import 'package:expenses_app/components/chart.dart';
 import 'package:expenses_app/components/transaction_form.dart';
 import 'package:expenses_app/components/transaction_list.dart';
 import 'package:expenses_app/models/transaction.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io';
 
 //Método main que roda a aplicação
 main() {
@@ -53,6 +55,12 @@ class _MyHomeAppState extends State<MyHomeApp> {
   //Minha lista principal de transações:
   List<Transaction> transactions = [];
 
+  final iconList = Platform.isIOS ? CupertinoIcons.refresh : Icons.list;
+  final iconChart = Platform.isIOS ? CupertinoIcons.refresh : Icons.pie_chart;
+
+  //Variável que vai controlar a exibição do gráfico:
+  bool _showChart = false;
+
   //Getter que retornas as transações de até 7 dias atras:
   List<Transaction> get _recentTransaction {
     return transactions.where((transac) {
@@ -91,64 +99,151 @@ class _MyHomeAppState extends State<MyHomeApp> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = AppBar(
-      title: Text(
-        "Despesas pessoais",
-        style: TextStyle(
-          //Tamanho da fonte de acordor com as configurações do sistema (acessibilidade)
-          //fontSize: 20 * MediaQuery.of(context).textScaleFactor
-          //color: Colors.white,
-          //fontFamily: "OpenSans"
-        ),
-      ),
-      //Action com botão abrir o modal
-      actions: [
-        IconButton(
-          onPressed: () => _openTransactionFormModal(context),
-          icon: Icon(Icons.add),
-        ),
-      ],
-      backgroundColor: Theme.of(context).primaryColor,
-    );
+    //Verifica se a orientação da tela está em landscape (tela vertical)
 
+    Widget _getIconButton(Function() fn, IconData icon) {
+      return Platform.isIOS
+          ? GestureDetector(onTap: fn, child: Icon(icon))
+          : IconButton(onPressed: fn, icon: Icon(icon));
+    }
+
+    final mediaQuery = MediaQuery.of(context);
+    bool isLandscape = mediaQuery.orientation == Orientation.landscape;
+
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text("Despesas pessoais"),
+            trailing: Row(
+              children: [
+                _getIconButton(
+                  () => _openTransactionFormModal(context),
+                  Platform.isIOS ? CupertinoIcons.add : Icons.add,
+                ),
+                if (isLandscape)
+                  _getIconButton(() {
+                    setState(() {
+                      _showChart = !_showChart;
+                    });
+                  }, _showChart ? iconChart : iconList),
+              ],
+            ),
+          )
+        : AppBar(
+            title: Text(
+              "Despesas pessoais",
+              style: TextStyle(
+                //Tamanho da fonte de acordor com as configurações do sistema (acessibilidade)
+                //fontSize: 20 * MediaQuery.of(context).textScaleFactor
+                //color: Colors.white,
+                //fontFamily: "OpenSans"
+              ),
+            ),
+            //Action com botão abrir o modal
+            actions: [
+              _getIconButton(
+                () => _openTransactionFormModal(context),
+                Icons.add,
+              ),
+              if (isLandscape)
+                _getIconButton(() {
+                  setState(() {
+                    _showChart = !_showChart;
+                  });
+                }, _showChart ? Icons.list : Icons.pie_chart),
+            ],
+            backgroundColor: Theme.of(context).primaryColor,
+          );
     final avaliableHeight =
-        MediaQuery.of(context).size.height -
+        mediaQuery.size.height -
         appBar.preferredSize.height -
-        MediaQuery.of(context).padding.top;
+        mediaQuery.padding.top;
 
-    return Scaffold(
-      //Barra inical do aplicativo
-      appBar: appBar,
-
-      //Widget SingleChildScrollView, deixa o componente rolável(O componente pai precisa ter um tamanho definido)
-      body: SingleChildScrollView(
+    final bodyPage = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           //Atributos para modificar alinhamento nos eixos horizontal e vertical, com base nas regras de flexbox
           //mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            //if (isLandscape)
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     Text("Exibir gráfico"),
+            //     //.adaptive, estiliza o switch de acordo com a plataforma
+            //     Switch.adaptive(
+            //       value: _showChart,
+            //       onChanged: (value) {
+            //         setState(() {
+            //           _showChart = value;
+            //         });
+            //       },
+            //     ),
+            //   ],
+            // ),
             //Gráfico que recebe a lista de transações dos últimos 7 dias:
-            Container(
-              height: avaliableHeight * 0.22,
-              child: Chart(_recentTransaction),
-            ),
-
-            //Componente que exibi todas as transações feitas:
-            Container(
-              height: avaliableHeight * 0.68,
-              child: TransactionList(transactions, _removeTransaction),
-            ),
+            _showChart
+                ? Container(
+                    height: isLandscape
+                        ? avaliableHeight
+                        : avaliableHeight * 0.22,
+                    child: Chart(_recentTransaction),
+                  )
+                :
+                  //if(!_showChart)
+                  //Componente que exibi todas as transações feitas:
+                  Container(
+                    height: isLandscape
+                        ? avaliableHeight
+                        : avaliableHeight * 0.68,
+                    child: TransactionList(transactions, _removeTransaction),
+                  ),
           ],
         ),
       ),
-      //Atributo do Scaffold para adicionar um botão no fim da tela
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        //Executando a função que chama a função de abrir o formulário:
-        onPressed: () => _openTransactionFormModal(context),
-      ),
-      //Atributo do Scaffold para definir a posição do botão na tela
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: Text("Despesas pessoias"),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _getIconButton(
+                    () => _openTransactionFormModal(context),
+                    Icons.add,
+                  ),
+                  if (isLandscape)
+                    _getIconButton(() {
+                      setState(() {
+                        _showChart = !_showChart;
+                      });
+                    }, _showChart ? Icons.list : Icons.pie_chart),
+                ],
+              ),
+            ),
+            child: bodyPage,
+          )
+        : Scaffold(
+            //Barra inical do aplicativo
+            appBar: appBar,
+
+            //Widget SingleChildScrollView, deixa o componente rolável(O componente pai precisa ter um tamanho definido)
+            body: bodyPage,
+            //Atributo do Scaffold para adicionar um botão no fim da tela
+            floatingActionButton:
+                Platform
+                    .isIOS //Verificando se a plataforma é IOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(Icons.add),
+                    //Executando a função que chama a função de abrir o formulário:
+                    onPressed: () => _openTransactionFormModal(context),
+                  ),
+            //Atributo do Scaffold para definir a posição do botão na tela
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+          );
   }
 }

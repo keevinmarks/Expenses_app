@@ -14,24 +14,33 @@ class TransactionList extends StatelessWidget {
   Widget build(BuildContext context) {
     return transactions.isEmpty
         //Se estiver com conteúdo, então vou exibir uma imagem
-        ? Column(
-            children: [
-              //Widget para dá um afastamento entre os componentes
-              SizedBox(height: 20),
-              Text(
-                "Nenhuma transação cadastrada!",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              SizedBox(height: 20),
-              //Envolvendo a o componente Image em um Container para pode usar a propriedade fit:
-              Container(
-                height: 400,
-                child: Image.asset(
-                  'assets/images/waiting.png',
-                  fit: BoxFit.cover,
+        ? LayoutBuilder(
+            builder: (ctx, constraints) {
+              return Container(
+                child: Column(
+                  children: [
+                    //Widget para dá um afastamento entre os componentes
+                    SizedBox(height: constraints.maxHeight * 0.05),
+                    Container(
+                      height: constraints.maxHeight * 0.22,
+                      child: Text(
+                        "Nenhuma transação cadastrada!",
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    SizedBox(height: constraints.maxHeight * 0.05),
+                    //Envolvendo a o componente Image em um Container para pode usar a propriedade fit:
+                    Container(
+                      height: constraints.maxHeight * 0.68,
+                      child: Image.asset(
+                        'assets/images/waiting.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              );
+            },
           )
         //Senão, vou usar o ListViem.builder para exibir somente o que for aparecer na tela
         : ListView.builder(
@@ -56,10 +65,15 @@ class TransactionList extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   subtitle: Text(DateFormat('d MMM y').format(tr.date)),
-                  trailing: IconButton(
-                    onPressed: () => removeTransaction(tr),
-                    icon: Icon(Icons.delete),
-                  ),
+                  trailing: MediaQuery.of(context).size.width > 600
+                      ? ElevatedButton(
+                          onPressed: () => removeTransaction(tr),
+                          child: Text("Remover item"),
+                        )
+                      : IconButton(
+                          onPressed: () => removeTransaction(tr),
+                          icon: Icon(Icons.delete),
+                        ),
                 ),
               );
             },

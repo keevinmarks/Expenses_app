@@ -48,61 +48,73 @@ class _TransactionFormState extends State<TransactionForm> {
       setState(() {
         _selectDate = pickedDate;
       });
-      
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: EdgeInsetsGeometry.all(10),
-        child: Column(
-          children: [
-            TextField(
-              //onChanged: (newValue) => value = newValue,
-              controller: titleController,
-              decoration: InputDecoration(labelText: "Título"),
-
-              //onSubmitted, quando o "enter" do teclado é pressionado
-              onSubmitted: (_) => sendTransactionLocal(),
-            ),
-            TextField(
-              //onChanged: (newValue) => title = newValue,
-              controller: valueController,
-              decoration: InputDecoration(labelText: "Valor R\$"),
-              keyboardType: TextInputType.numberWithOptions(),
-              onSubmitted: (_) => sendTransactionLocal(),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(child: Text(_selectDate == null ? "Nenhuma data selecionada" : DateFormat("dd/MM/y").format(_selectDate))),
-                  ElevatedButton(
-                    onPressed: _showDatePicker,
-                    child: Text(
-                      "Selecionar data",
-                      style: TextStyle(color: Colors.purple),
+    return SingleChildScrollView(
+      child: Card(
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: 10,
+            right: 10 + MediaQuery.of(context).viewInsets.right,
+            left: 10 + MediaQuery.of(context).viewInsets.left,
+            bottom: 10 + MediaQuery.of(context).viewInsets.bottom
+          ),
+          child: Column(
+            children: [
+              TextField(
+                //onChanged: (newValue) => value = newValue,
+                controller: titleController,
+                decoration: InputDecoration(labelText: "Título"),
+      
+                //onSubmitted, quando o "enter" do teclado é pressionado
+                onSubmitted: (_) => sendTransactionLocal(),
+              ),
+              TextField(
+                //onChanged: (newValue) => title = newValue,
+                controller: valueController,
+                decoration: InputDecoration(labelText: "Valor R\$"),
+                keyboardType: TextInputType.numberWithOptions(),
+                onSubmitted: (_) => sendTransactionLocal(),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _selectDate == null
+                            ? "Nenhuma data selecionada"
+                            : DateFormat("dd/MM/y").format(_selectDate),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            ElevatedButton(
-              onPressed: sendTransactionLocal,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-              ),
-              child: Text(
-                "Nova transação",
-                style: TextStyle(
-                  color: Colors.purple,
-                  fontWeight: FontWeight.bold,
+                    ElevatedButton(
+                      onPressed: _showDatePicker,
+                      child: Text(
+                        "Selecionar data",
+                        style: TextStyle(color: Colors.purple),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              ElevatedButton(
+                onPressed: sendTransactionLocal,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                ),
+                child: Text(
+                  "Nova transação",
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
