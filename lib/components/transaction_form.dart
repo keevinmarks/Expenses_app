@@ -21,7 +21,7 @@ class _TransactionFormState extends State<TransactionForm> {
   void sendTransactionLocal() {
     final String title = titleController.text;
     final double value = double.tryParse(valueController.text) ?? 0;
-    if (titleController.text.isEmpty || value <= 0 || _selectDate == null) {
+    if (titleController.text.isEmpty || value <= 0) {
       return;
     }
 
@@ -85,9 +85,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   children: [
                     Expanded(
                       child: Text(
-                        _selectDate == null
-                            ? "Nenhuma data selecionada"
-                            : DateFormat("dd/MM/y").format(_selectDate),
+                         DateFormat("dd/MM/y").format(_selectDate),
                       ),
                     ),
                     ElevatedButton(
