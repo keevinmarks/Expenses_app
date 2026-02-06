@@ -1,16 +1,23 @@
+import 'package:expenses_app/components/adaptative_button.dart';
+import 'package:expenses_app/components/adaptative_data_picker.dart';
+import 'package:expenses_app/components/adaptative_text_field.dart';
 import 'package:expenses_app/models/transaction.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
   final int length;
 
   final void Function(Transaction) sendTransaction;
 
-  TransactionForm(this.sendTransaction, this.length);
+  TransactionForm(this.sendTransaction, this.length) {
+    print("Constructor TransactionForm");
+  }
 
   @override
-  State<TransactionForm> createState() => _TransactionFormState();
+  State<TransactionForm> createState() {
+    print("createState TransactionForm");
+    return _TransactionFormState();
+  }
 }
 
 class _TransactionFormState extends State<TransactionForm> {
@@ -18,10 +25,35 @@ class _TransactionFormState extends State<TransactionForm> {
   final valueController = TextEditingController();
   DateTime _selectDate = DateTime.now();
 
+  _TransactionFormState() {
+    print("Constructor _TransactionFormState");
+  }
+
+  //Executado antes do build
+  @override
+  void initState(){
+    print("initState() _TransactionFormState");
+    super.initState();
+  }
+
+  //Quando uma alteração no widget é feita, passando o widget antigo
+  @override
+  void didUpdateWidget(TransactionForm oldWidget){
+    print("didUpdateWidget() _TransactionFormState");
+    super.didUpdateWidget(oldWidget);
+  }
+
+  //Quando um widget finaliza
+  @override
+  void dispose(){
+    print("dispose() _TransactionFormState");
+    super.dispose();
+  }
+
   void sendTransactionLocal() {
     final String title = titleController.text;
     final double value = double.tryParse(valueController.text) ?? 0;
-    if (titleController.text.isEmpty || value <= 0) {
+    if (titleController.text.isEmpty || value <= 0 || _selectDate == null) {
       return;
     }
 
@@ -35,84 +67,42 @@ class _TransactionFormState extends State<TransactionForm> {
     widget.sendTransaction(transac);
   }
 
-  _showDatePicker() {
-    showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2015),
-      lastDate: DateTime(3000),
-    ).then((pickedDate) {
-      if (pickedDate == null) {
-        return;
-      }
-      setState(() {
-        _selectDate = pickedDate;
-      });
+  void onDateChanged(DateTime newDate) {
+    setState(() {
+      _selectDate = newDate;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Card(
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: 10,
-            right: 10 + MediaQuery.of(context).viewInsets.right,
-            left: 10 + MediaQuery.of(context).viewInsets.left,
-            bottom: 10 + MediaQuery.of(context).viewInsets.bottom
-          ),
-          child: Column(
-            children: [
-              TextField(
-                //onChanged: (newValue) => value = newValue,
-                controller: titleController,
-                decoration: InputDecoration(labelText: "Título"),
-      
-                //onSubmitted, quando o "enter" do teclado é pressionado
-                onSubmitted: (_) => sendTransactionLocal(),
-              ),
-              TextField(
-                //onChanged: (newValue) => title = newValue,
-                controller: valueController,
-                decoration: InputDecoration(labelText: "Valor R\$"),
-                keyboardType: TextInputType.numberWithOptions(),
-                onSubmitted: (_) => sendTransactionLocal(),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                         DateFormat("dd/MM/y").format(_selectDate),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: _showDatePicker,
-                      child: Text(
-                        "Selecionar data",
-                        style: TextStyle(color: Colors.purple),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ElevatedButton(
-                onPressed: sendTransactionLocal,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                ),
-                child: Text(
-                  "Nova transação",
-                  style: TextStyle(
-                    color: Colors.purple,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
+    print("build() _TransactionFormState");
+    return Card(
+      child: Padding(
+        padding: EdgeInsetsGeometry.all(10),
+        child: Column(
+          children: [
+            AdaptativeTextField(
+              placeholder: "Titulo",
+              controller: titleController,
+              submitAction: (_) => sendTransactionLocal(),
+            ),
+            AdaptativeTextField(
+              placeholder: "Valor R\$",
+              controller: valueController,
+              keyBoardType: TextInputType.numberWithOptions(),
+              submitAction: (_) => sendTransactionLocal(),
+            ),
+            AdaptativeDataPicker(
+              selectedDate: _selectDate,
+              onDateChanged: onDateChanged,
+            ),
+            AdaptativeButton(
+              label: "Nova transação",
+              onPressed: sendTransactionLocal,
+              textColor: Colors.amber,
+              backGroundColor: Colors.blueAccent,
+            ),
+          ],
         ),
       ),
     );

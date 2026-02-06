@@ -8,7 +8,9 @@ class Chart extends StatelessWidget {
   final List<Transaction> recentTransaction;
 
   //Recebendo a lista que com datas nos últimos 7 dias:
-  Chart(this.recentTransaction);
+  Chart(this.recentTransaction){
+    //print("Método construtor de Chart");
+  }
 
 
   //Getter que vai retornar a soma total de todas as transações nos últimos 7 dias
@@ -57,6 +59,7 @@ class Chart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //print("build() Chart");
     return Card(
       elevation: 6,
       margin: EdgeInsets.all(20),
